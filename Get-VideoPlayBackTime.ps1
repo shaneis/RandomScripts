@@ -25,7 +25,16 @@ function Get-VideoPlayBackTime {
 
 
         If the video is sped up to 2x the speed, a video of 60 minutes will finish in 30 minutes.
+        
+    .EXAMPLE
+        PS C:\> video 44 1
 
+        Minutes Seconds SpeedUp NewFinish
+        ------- ------- ------- ---------
+             44       1     1.5  00:29:21
+
+        Showing shortcut using alias, positional parameters, and default values.
+        
     .INPUTS
         [Int]
         [Double]
