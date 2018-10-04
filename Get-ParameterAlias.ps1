@@ -3,7 +3,7 @@ function Get-ParameterAlias {
     param (
         [Parameter(Position = 0)]
         [Alias('Function')]
-        [String]
+        [String[]]
         $Command
     )
     
@@ -12,7 +12,7 @@ function Get-ParameterAlias {
     
     process {
         Write-Verbose -Message "[PROCESS] Checking parameter aliases for [$_]..."
-        foreach ($cmd in (Get-Command -Name $Command).Name) {
+        foreach ($cmd in (Get-Command -Name $Command -CmdletType Cmdlet).Name) {
             $cmdObject = Get-Command -Name $cmd
             $cmdObject.Parameters.Values |
                 ForEach-Object -Process {
