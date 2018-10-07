@@ -1,30 +1,71 @@
+class ParameterAliasInfo {
+  [System.Management.Automation.CommandInfo]$Command
+  [string]$Parameter
+  [string]$Alias
+}
+
 function Get-ParameterAlias {
+
     [CmdletBinding()]
-    param (
-        [Parameter(Position = 0)]
+    [OutputType([ParameterAliasInfo])]
+    Param (
+        [Parameter(Position = 0, ValueFromPipeline)]
         [Alias('Function')]
+        [Alias('Command')]
         [String[]]
-        $Command
+        $Name,
+
+        [switch]
+        $IncludeCommon
     )
-    
-    begin {
-    }
-    
-    process {
-        Write-Verbose -Message "[PROCESS] Checking parameter aliases for [$_]..."
-        foreach ($cmd in (Get-Command -Name $Command -CommandType Function).Name) {
-            $cmdObject = Get-Command -Name $cmd
-            $cmdObject.Parameters.Values |
-                ForEach-Object -Process {
-                    [PSCustomObject]@{
-                        Command = $cmd
-                        Parameterr = $_.Name
-                        Alias = $_ | Select-Object -ExpandProperty Aliases
-                    }
-                }
+
+    Begin {
+      $ParametersToExclude = 
+        if($IncludeCommon) {
+          Write-Verbose 'Including common parameters'
+        }
+        else {
+          Write-Verbose 'Excluding common parameters'
+
+          'WarningVariable',
+          'ErrorVariable',
+          'InformationVariable',
+          'PipelineVariable',
+          'OutBuffer',
+          'InformationAction',
+          'Verbose',
+          'OutVariable',
+          'Debug',
+          'WarningAction',
+          'ErrorAction',
+          'WhatIf',
+          'Confirm'
         }
     }
     
-    end {
+    Process {
+        Get-Command -Name $Name -PipelineVariable Command -Type Cmdlet,Function,Filter |
+          Foreach-Object {
+            if(-not $Command.Parameters) {
+              Write-Verbose "$($Command.Name) has no parameters; skipping it."
+              return
+            }
+
+            Write-Verbose "Processing $($Command.Name)."
+
+            @($Command.Parameters.GetEnumerator()).Value |
+              Where-Object Name -NotIn $ParametersToExclude |
+              Where-Object Aliases -PipelineVariable Parameter |
+              ForEach-Object {
+                $Parameter.Aliases |
+                  ForEach-Object {
+                    [ParameterAliasInfo]@{
+                      Command   = $Command
+                      Parameter = $Parameter.Name
+                      Alias     = $_
+                    }
+                  }
+              }
+        }
     }
 }
