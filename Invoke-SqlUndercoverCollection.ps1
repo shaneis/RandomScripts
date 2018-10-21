@@ -21,6 +21,12 @@ function Invoke-SQLUndercoverCollection {
             Write-Verbose "[BEGIN  ] Required modules not found. Exiting..."
             break
         }
+        
+        Write-Verbose "[BEGIN  ] Initialising default values and parameters..."
+        [int]$Pos = 0
+        [System.Collections.Generic.List[string]]$InvalidServers
+        [System.Collections.Generic.List[string]]$ActiveServers
+        [System.Collections.Generic.List[psobject]]$Build
 
         Write-Verbose "[BEGIN  ] [$CentralServer] - Checking central server connectivity."
         $CentralConnection = Get-DbaDatabase -SqlInstance $CentralServer -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
@@ -42,7 +48,8 @@ function Invoke-SQLUndercoverCollection {
             ForEach-Object {
                 Write-Verbose "[PROCESS] [$($_.ServerName)] - Getting Inspector build info..."
                 $InspectorBuildQry = "EXEC [$LoggingDb].[Inspector].[PSGetInspectorBuild];"
-                $Connection = 
+                $Connection = Get-DbaDatabase -SqlInstance $_.ServerName -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
+
             }
     }
     
