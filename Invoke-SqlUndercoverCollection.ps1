@@ -24,7 +24,7 @@ function Invoke-SQLUndercoverCollection {
         
         Write-Verbose "[BEGIN  ] Initialising default values and parameters..."
         [int]$Pos = 0
-        [System.Collections.Generic.List[string]]$InvalidServers
+        [System.Collections.Generic.List[int]]$InvalidServers
         [System.Collections.Generic.List[string]]$ActiveServers
         [System.Collections.Generic.List[psobject]]$Build
         [string]$ModuleConfig
