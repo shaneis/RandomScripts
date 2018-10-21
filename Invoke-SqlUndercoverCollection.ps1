@@ -53,6 +53,7 @@ function Invoke-SQLUndercoverCollection {
                 Write-Verbose "[PROCESS] [$($_.ServerName)] - Getting Inspector build info..."
                 $Connection = Get-DbaDatabase -SqlInstance $_.Servername -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
                 
+                Write-Debug $Connection
                 if ($null -eq $Connection.Name) {
                     Write-Warning "[PROCESS] [$($_.ServerName)] - Logging database [$LoggingDb] does not exist [$Connection] - [$($Connection.Name)]."
                     $InvalidServers.Add($Pos)
