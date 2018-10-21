@@ -24,9 +24,9 @@ function Invoke-SQLUndercoverCollection {
         
         Write-Verbose "[BEGIN  ] Initialising default values and parameters..."
         [int]$Pos = 0
-        [System.Collections.Generic.List[int]]$InvalidServers
-        [System.Collections.Generic.List[string]]$ActiveServers
-        [System.Collections.Generic.List[psobject]]$Build
+        $InvalidServers = New-Object -TypeName System.Collections.Generic.List[int]
+        $ActiveServers = New-Object -TypeName System.Collections.Generic.List[string]
+        $Build = New-Object -TypeName System.Collections.Generic.List[psobject]
         [string]$ModuleConfig
 
         Write-Verbose "[BEGIN  ] [$CentralServer] - Checking central server connectivity."
@@ -49,12 +49,17 @@ function Invoke-SQLUndercoverCollection {
             ForEach-Object {
                 Write-Verbose "[PROCESS] [$($_.ServerName)] - Getting Inspector build info..."
                 $InspectorBuildQry = "EXEC [$LoggingDb].[Inspector].[PSGetInspectorBuild];"
-                $Connection = Get-DbaDatabase -SqlInstance $_.ServerName -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
-
+                $Connection = Get-DbaDatabase -SqlInstance $_.Servername -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
+                $Connection.Name
                 if (-not ($Connection.Name)) {
-                    Write-Warning "[PROCESS] [$($_.ServerName)] - Logging database [$LoggingDb] does not exist."
+                    Write-Warning "[PROCESS] [$($_.ServerName)] - Logging database [$LoggingDb] does not exist [$Connection] - [$($Connection.Name)]."
+                    $InvalidServers.Add($Pos)
+                    $Pos++
+                    break
                 }
+                "test01"
             }
+            "test02"
     }
     
     end {
