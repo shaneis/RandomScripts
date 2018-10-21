@@ -27,6 +27,7 @@ function Invoke-SQLUndercoverCollection {
         [System.Collections.Generic.List[string]]$InvalidServers
         [System.Collections.Generic.List[string]]$ActiveServers
         [System.Collections.Generic.List[psobject]]$Build
+        [string]$ModuleConfig
 
         Write-Verbose "[BEGIN  ] [$CentralServer] - Checking central server connectivity."
         $CentralConnection = Get-DbaDatabase -SqlInstance $CentralServer -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
@@ -50,6 +51,9 @@ function Invoke-SQLUndercoverCollection {
                 $InspectorBuildQry = "EXEC [$LoggingDb].[Inspector].[PSGetInspectorBuild];"
                 $Connection = Get-DbaDatabase -SqlInstance $_.ServerName -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
 
+                if (-not ($Connection.Name)) {
+                    Write-Warning "[PROCESS] [$($_.ServerName)] - Logging database [$LoggingDb] does not exist."
+                }
             }
     }
     
