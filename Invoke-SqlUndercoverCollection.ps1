@@ -1,3 +1,5 @@
+#requires -Modules dbatools
+
 function Invoke-SQLUndercoverCollection {
     [CmdletBinding()]
     param (
