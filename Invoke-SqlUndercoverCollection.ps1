@@ -34,7 +34,7 @@ function Invoke-SQLUndercoverCollection {
         Write-Verbose "[BEGIN  ] [$CentralServer] - Central server connectivity ok."
 
         Write-Verbose "[BEGIN  ] Checking for the existance of the database: ${LoggingDb}."
-        if (-not ($CentralServer.Name)) {
+        if (-not $CentralConnection.Name) {
             Write-Warning "[$CentralServer] - Logging database specified does not exist."
             break
         }
