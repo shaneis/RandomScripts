@@ -45,17 +45,16 @@ function Invoke-SQLUndercoverCollection {
     }
     
     process {
-        $ActiveServers |
+        $ActiveServers.Servername |
             ForEach-Object -Begin {
                 Write-Verbose "[PROCESS] Setting `$InspectorBuildQry variable."
                 $InspectorBuildQry = "EXEC [$LoggingDb].[Inspector].[PSGetInspectorBuild];"
             } -Process {
-                Write-Verbose "[PROCESS] [$($_.ServerName)] - Getting Inspector build info..."
-                $Connection = Get-DbaDatabase -SqlInstance $_.Servername -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
+                Write-Verbose "[PROCESS] [$($_)] - Getting Inspector build info..."
+                $Connection = Get-DbaDatabase -SqlInstance $_ -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
                 
-                Write-Debug $Connection
-                if ($null -eq $Connection.Name) {
-                    Write-Warning "[PROCESS] [$($_.ServerName)] - Logging database [$LoggingDb] does not exist [$Connection] - [$($Connection.Name)]."
+                if (-not $Connection.Name) {
+                    Write-Warning "[PROCESS] [$($_)] - Logging database [$LoggingDb] does not exist."
                     $InvalidServers.Add($Pos)
                     $Pos++
                     break
