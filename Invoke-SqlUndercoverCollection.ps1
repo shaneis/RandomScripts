@@ -16,13 +16,6 @@ function Invoke-SQLUndercoverCollection {
         [string[]]$requiredModules = 'dbatools'
         Write-Verbose "[BEGIN  ] Checking required module is available: ${requiredModules}."
         $reqModulesPresent = Get-Module -ListAvailable -Name $requiredModules
-
-        if (-not ($reqModulesPresent)) {
-            Write-Warning "Missing required modules: ${requiredModules}."
-            Write-Warning "Please install the required modules and try again."
-            Write-Verbose "[BEGIN  ] Required modules not found. Exiting..."
-            break
-        }
         
         Write-Verbose "[BEGIN  ] Initialising default values and parameters..."
         [int]$Pos = 0
