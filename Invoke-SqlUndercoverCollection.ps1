@@ -70,6 +70,7 @@ function Invoke-SQLUndercoverCollection {
             $Builds | 
                 Where-Object Build -lt 1.2 |
                 Format-Table -Property Servername, Build
+            break
         }
     }
     
