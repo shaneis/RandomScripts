@@ -37,6 +37,7 @@ function Invoke-SQLUndercoverCollection {
     }
     
     process {
+        Write-Verbose "[PROCESS] Processing active servers..."
         $ActiveServers.Servername |
             ForEach-Object -Begin {
                 Write-Verbose '[PROCESS] Setting $InspectorBuildQry variable.'
