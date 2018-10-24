@@ -80,6 +80,16 @@ function Invoke-SQLUndercoverCollection {
             break
         }
         Write-Verbose "[PROCESS] [Validation] - Active Server Inspector builds match."
+
+        Write-Verbose "[PROCESS] Collecting settings data for syncing between servers..."
+        Write-Verbose "[PROCESS] [$CentralServer] - Getting centralised settings..."
+        $SettingsTables = 'Settings', 'CurrentServers', 'EmailRecipients', 'EmailConfig', 'Modules'
+        foreach ($Setting in $SettingsTables) {
+            $ColumnNamesQry = "EXEC [$LoggingDb].[Inspector].[PSGetColumns] @Tablename = '$Setting'"
+            $ColumnNames = $CentralConnection.Query($ColumnNamesQry)
+            $ColumnNamesFromTableQry = "SELECT $($ColumnNames.Columnnames) FROM [$LoggingDb].[Inspector].[$Setting]"
+            Set-Variable -Name "Central$($Setting)" -Value ($CentralConnection.Query($ColumnNamesFromTableQry))
+        }
     }
     
     end {
