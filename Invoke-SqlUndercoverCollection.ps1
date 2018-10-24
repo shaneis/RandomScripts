@@ -13,15 +13,12 @@ function Invoke-SQLUndercoverCollection {
     )
     
     begin {
-        [string[]]$requiredModules = 'dbatools'
-        Write-Verbose "[BEGIN  ] Checking required module is available: ${requiredModules}."
-        $reqModulesPresent = Get-Module -ListAvailable -Name $requiredModules
         
         Write-Verbose "[BEGIN  ] Initialising default values and parameters..."
         [int]$Pos = 0
         $InvalidServers = New-Object -TypeName System.Collections.Generic.List[int]
         $ActiveServers = New-Object -TypeName System.Collections.Generic.List[string]
-        $Build = New-Object -TypeName System.Collections.Generic.List[psobject]
+        $Builds = New-Object -TypeName System.Collections.Generic.List[psobject]
         [string]$ModuleConfig
 
         Write-Verbose "[BEGIN  ] [$CentralServer] - Checking central server connectivity."
@@ -54,7 +51,23 @@ function Invoke-SQLUndercoverCollection {
                     $Pos++
                     break
                 }
+
+                Write-Verbose "[PROCESS] Adding build for $Connection and $($Connection.Name)."
+                $Builds.Add($Connection.Query($InspectorBuildQry))
+                $Pos++
             }
+
+        Write-Verbose "[PROCESS] Removing invalid servers from ActiveServers array."
+        $InvalidServers.Servername |
+            ForEach-Object -Process {
+                Write-Warning "[Validation] - Removing Invalid Server [$_] from the Active Server list."
+                $ActiveServers.Remove($_)
+            }
+
+        Write-Verbose "[PROCESS] Checking minimum build and build comparison."
+        if (($Builds | Sort-Object -Property Build | Select-Object -Property Build -First 1).Build -lt 1.2) {
+            Write-Verbose "[Validation] - Inspector builds do not match."
+        }
     }
     
     end {
