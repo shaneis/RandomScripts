@@ -39,7 +39,7 @@ function Invoke-SQLUndercoverCollection {
     process {
         $ActiveServers.Servername |
             ForEach-Object -Begin {
-                Write-Verbose "[PROCESS] Setting `$InspectorBuildQry variable."
+                Write-Verbose '[PROCESS] Setting $InspectorBuildQry variable.'
                 $InspectorBuildQry = "EXEC [$LoggingDb].[Inspector].[PSGetInspectorBuild];"
             } -Process {
                 Write-Verbose "[PROCESS] [$($_)] - Getting Inspector build info..."
@@ -57,14 +57,14 @@ function Invoke-SQLUndercoverCollection {
                 $Pos++
             }
 
-        Write-Verbose "[PROCESS] Removing invalid servers from ActiveServers array."
+        Write-Verbose "[PROCESS] Removing invalid servers from ActiveServers array..."
         $InvalidServers.Servername |
             ForEach-Object -Process {
                 Write-Warning "[Validation] - Removing Invalid Server [$_] from the Active Server list."
                 $ActiveServers.Remove($_)
             }
 
-        Write-Verbose "[PROCESS] Checking minimum build and build comparison."
+        Write-Verbose "[PROCESS] Checking minimum build and build comparison..."
         if (($Builds | Sort-Object -Property Build | Select-Object -Property Build -First 1).Build -lt 1.2) {
             Write-Verbose "[Validation] - Inspector builds do not match."
             $Builds | 
@@ -72,6 +72,10 @@ function Invoke-SQLUndercoverCollection {
                 Format-Table -Property Servername, Build
             break
         }
+        Write-Verbose "[PROCESS] [Validation] - Minimum build check ok."
+
+        Write-Verbose "[PROCESS] Comparing minimum build and maximum build..."
+        if (($Builds | Sort-Object -Property Build | Select))
     }
     
     end {
