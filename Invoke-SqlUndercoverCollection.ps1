@@ -67,6 +67,9 @@ function Invoke-SQLUndercoverCollection {
         Write-Verbose "[PROCESS] Checking minimum build and build comparison."
         if (($Builds | Sort-Object -Property Build | Select-Object -Property Build -First 1).Build -lt 1.2) {
             Write-Verbose "[Validation] - Inspector builds do not match."
+            $Builds | 
+                Where-Object Build -lt 1.2 |
+                Format-Table -Property Servername, Build
         }
     }
     
