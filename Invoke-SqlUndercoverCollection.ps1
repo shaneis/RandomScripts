@@ -191,6 +191,49 @@ function Invoke-SQLUndercoverCollection {
                 $InsertAction = $Module.InsertAction.ToString().split(',')
                 $RetentionInDays = $Module.RetentionInDays.ToString().split(',')
                 $Pos = 0
+                Write-Verbosee "[PROCESS] [$Servername] - Getting data for: $Modulename"
+                $Tablename | ForEach-Object -Process {
+                    $BaseTable = $_
+                    Write-Verbose "[PROCESS] Switching destination to central server."
+                    $WriteTableOptions.SqlInstance = $CentralServer
+
+                    [int]$TableActionPos = $TableAction[$Pos]
+                    switch ($TableActionPos) {
+                        { $_ -lt 3 } {
+                            $WriteTableOptions.Table = $Tablename[$Pos]
+                            Write-Verbose "[PROCESS] Delete logged info for server from Central Db."
+                            $DeleteQry = "EXEC sp_executesql N'DELETE FROM [$LoggingDb].[Inspector].[$($Tablename[$Pos])] WHERE [Servername] = @Severname"
+                        }
+                        { $_ -eq 2 } {
+                            Write-Verbose "[PROCESS] Append the retention period to the WHERE clause."
+                            $DeleteQry = $DeleteQry + "AND [Log_Date] < DATEADD(DAY, -@Retention, GETDATE())', N'@Servername nvarchar(128), @Retention int', @Servername = '$Servername', @Retention = $($ReetentionInDays[$Pos]);"
+                        }
+                        { $_ -eq 1 } {
+                            Write-Verbose "[PROCESS] Delete all data in table for server from..."
+                            $DeleteQry = $DeleteQry + "', N'@Servername nvarchar(128)', @Servername = '$Servername'"
+                        }
+                        { $_ -eq 3 } {
+                            $WriteTableOptions.Table = $($StageTablename[$Pos])
+                            Write-Verbose "[PROCESS] Truncate stage table."
+                            $DeleteQry = "TRUNCATE TABLE [$LoggingDb].[Inspector].[$StageTablename[$Pos])];"
+                        }
+                    }
+                    $CollectedData = $CurrentConnection.Query($DeleteQry)
+
+                    if ($CollectedData) {
+                        Write-DbaDataTable @WriteTableOptions -InputObject $CollectedData -KeepNull
+                    }
+                    $Pos += 1
+
+                    Write-Verbose "[PROCESS] Removing data table for every iteration after the data has been inserted into the central server logging database."
+                    Clear-Variable -Name CollectedData, Columnnames, Module
+                }
+
+                if ($StageProcname) {
+                    Write-Verbose "[PROCESS] [$Servername] - Executing staging proc: $StageProcname on [$CentralServer]"
+                    $ProcQry = "EXEC [$LoggingDb].[Inspector].[$StageProcname] @Servername = '$Servername';"
+                    $CentralConnection.Query($ProcQry)
+                }
             }
             #endregion
     }
