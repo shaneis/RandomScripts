@@ -55,7 +55,7 @@ function Invoke-SQLUndercoverCollection {
                 }
 
                 Write-Verbose "[PROCESS] Adding build for $ConnectionCurrent and $($ConnectionCurrent.Name)."
-                $Builds.Add($ConnectionCurrent.Query($InspectorBuildQry)
+                $Builds.Add($ConnectionCurrent.Query($InspectorBuildQry))
                 $Pos++
             }
 
