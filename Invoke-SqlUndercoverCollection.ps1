@@ -54,7 +54,7 @@ function Invoke-SQLUndercoverCollection {
                     break
                 }
 
-                Write-Verbose "[PROCESS] Adding build for $ConnectionCurrent and $($ConnectionCurrent.Name)." = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
+                Write-Verbose "[PROCESS] Adding build for $ConnectionCurrent and $($ConnectionCurrent.Name)."
                 $Builds.Add($ConnectionCurrent.Query($InspectorBuildQry)) = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
                 $Pos++
             }
