@@ -20,7 +20,7 @@ function Invoke-SQLUndercoverCollection {
         $InvalidServers = New-Object -TypeName System.Collections.Generic.List[int]
         $ActiveServers = New-Object -TypeName System.Collections.Generic.List[string]
         $Builds = New-Object -TypeName System.Collections.Generic.List[psobject]
-        [string]$ModuleConfig = $null # SON: Has to be a string NULL or is $null okay?
+        [string]$ModuleConfig = 'NULL' # SON: Has to be a string NULL or is $null okay?
 
         Write-Verbose "[BEGIN  ] [$CentralServer] - Checking central server connectivity."
         $CentralConnection = Get-DbaDatabase -SqlInstance $CentralServer -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
