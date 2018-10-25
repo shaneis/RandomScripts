@@ -240,8 +240,8 @@ function Invoke-SQLUndercoverCollection {
             $CentralConnection.Query($ReportQry)
             
             Write-Verbose "[PROCESS] [$CentralServer] - SQLUndercover Report has completed."
+        }
     }
-    
     end {
     }
 }
