@@ -106,7 +106,6 @@ function Invoke-SQLUndercoverCollection {
         $LinkedServername = ($CentralSettings | Where-Object Description -eq LinkedServername).Value
         if ($LinkedServername.Length -gt 1) {
             Write-Warning "[Validation] - The Inspector has been configured for use with a Linked server please reinstall the Inspector with @LinkedServername = NULL"
-            # SON: think you've found something I haven't before :) @LinkedServername ... why '@' and not '$'?
             break
         }
         Write-Verbose "[PROCESS] [Validation] - Inspector configured correctly for PS collection."
