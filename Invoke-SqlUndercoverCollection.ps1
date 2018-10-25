@@ -62,8 +62,9 @@ function Invoke-SQLUndercoverCollection {
         Write-Verbose "[PROCESS] Removing invalid servers from ActiveServers array..."
         $InvalidServers.Servername |
             ForEach-Object -Process {
+                $BadServername = $_
                 Write-Warning "[Validation] - Removing Invalid Server [$_] from the Active Server list."
-                $ActiveServers.Remove($_)
+                $ActiveServers = $ActiveServers | Where-Object { $_.Servername -ne $BadServername }
             }
 
         Write-Verbose "[PROCESS] Checking minimum build and build comparison..."
