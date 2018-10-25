@@ -10,7 +10,12 @@ function Invoke-SQLUndercoverCollection {
 
         [Parameter(Mandatory, Position = 1, ValueFromPipelineByPropertyName)]
         [Alias('Database', 'DatabaseName')]
-        [String]$LoggingDb
+        [String]$LoggingDb,
+
+        [Parameter(Position = 2, ValueFromPipelineByPropertyName)]
+        [ValidateNotNullOrEmpty()]
+        [Alias('File')]
+        [String]$FileName = 'C:\Temp\Inspector.html'
     )
     
     begin {
