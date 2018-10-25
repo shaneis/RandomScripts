@@ -190,6 +190,7 @@ function Invoke-SQLUndercoverCollection {
                         { $_ -lt 3 } {
                             $WriteTableOptions.Table = $Tablename[$Pos]
                             Write-Verbose "[PROCESS] Delete logged info for server from Central Db."
+
                             $DeleteQry = "EXEC sp_executesql N'DELETE FROM [$LoggingDb].[Inspector].[$($Tablename[$Pos])] WHERE [Servername] = @Servername"
                         }
                         { $_ -eq 2 } {
@@ -213,7 +214,6 @@ function Invoke-SQLUndercoverCollection {
                     }
                     $Pos += 1
 
-                    Write-Verbose "[PROCESS] Removing data table for every iteration after the data has been inserted into the central server logging database."
                     Clear-Variable -Name CollectedData, Columnnames, Module
                 }
 
