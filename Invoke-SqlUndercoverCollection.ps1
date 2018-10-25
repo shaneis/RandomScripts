@@ -45,13 +45,12 @@ function Invoke-SQLUndercoverCollection {
                 $InspectorBuildQry = "EXEC [$LoggingDb].[Inspector].[PSGetInspectorBuild];"
             } -Process {
                 Write-Verbose "[PROCESS] [$($_)] - Getting Inspector build info..."
-                $ConnectioCurrentn = Get-DbaDatabase -SqlInstance $_ -Database $LoggingDb -ErrorAction Stop -WarningAction Stop = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
+                $ConnectionCurrent = Get-DbaDatabase -SqlInstance $_ -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
 
                 if ($Servername -ne $CentralServer) {
                     Write-Verbose "[PROCESS] [$Servername] - Started settings sync..."
-                
-                if (-not $ConnectioCurrentn.Name) { = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
-
+                }
+                if (-not $ConnectionCurrent.Name) {
                     if ($Servername -ne $CentralServer) {
                         Write-Verbose "[PROCESS] [$Servername] - Started settings sync..."
                     Write-Warning "[PROCESS] [$($_)] - Logging database [$LoggingDb] does not exist."
@@ -60,11 +59,11 @@ function Invoke-SQLUndercoverCollection {
                     break
                 }
 
-                Write-Verbose "[PROCESS] Adding build for $ConnectioCurrentn and $($ConnectioCurrentn.Name)." = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
+                Write-Verbose "[PROCESS] Adding build for $ConnectionCurrent and $($ConnectionCurrent.Name)." = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
 
                 if ($Servername -ne $CentralServer) {
                     Write-Verbose "[PROCESS] [$Servername] - Started settings sync..."
-                $Builds.Add($ConnectioCurrentn.Query($InspectorBuildQry)) = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
+                $Builds.Add($ConnectionCurrent.Query($InspectorBuildQry)) = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
 
                 if ($Servername -ne $CentralServer) {
                     Write-Verbose "[PROCESS] [$Servername] - Started settings sync..."
@@ -234,8 +233,25 @@ function Invoke-SQLUndercoverCollection {
                     $ProcQry = "EXEC [$LoggingDb].[Inspector].[$StageProcname] @Servername = '$Servername';"
                     $CentralConnection.Query($ProcQry)
                 }
+
+                if ($Servername -ne $CentralServer) {
+                    Write-Verbose "[PROCESS] [$Servername] - Finished data retrieval loop."
+                }
             }
             #endregion
+            
+            Write-Verbose "[PROCESS] [$CentralServer] - Executing [Inspector].[SQLUnderCoverInspectorReport] @EmailDistribution 'DBA', @ModuleDesc = $ModuleConfig, @EmailRedWarningsOnly = 0, @Theme = 'Dark', @PSCollection = 1"
+            $ReportQry = @"
+            EXEC [$LoggingDb].[Inspector].[SQLUnderCoverInspectorReport]
+                @EmailDistributionGroup = 'DBA',
+                @ModuleDesc = $ModuleConfig,
+                @EmailRedWarningsOnly = 0,
+                @Theme = 'Dark',
+                @PSCollection = 1          
+"@
+            $CentralConnection.Query($ReportQry)
+            
+            Write-Verbose "[PROCESS] [$CentralServer] - SQLUndercover Report has completed."
     }
     
     end {
