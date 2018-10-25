@@ -26,7 +26,7 @@ function Invoke-SQLUndercoverCollection {
         $CentralConnection = Get-DbaDatabase -SqlInstance $CentralServer -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
         Write-Verbose "[BEGIN  ] [$CentralServer] - Central server connectivity ok."
 
-        Write-Verbose "[BEGIN  ] Checking for the existance of the database: ${LoggingDb}."
+        Write-Verbose "[BEGIN  ] Checking for the existance of the database: $LoggingDb."
         if (-not $CentralConnection.Name) {
             Write-Warning "[$CentralServer] - Logging database specified does not exist."
             break
@@ -47,12 +47,7 @@ function Invoke-SQLUndercoverCollection {
                 Write-Verbose "[PROCESS] [$($_)] - Getting Inspector build info..."
                 $ConnectionCurrent = Get-DbaDatabase -SqlInstance $_ -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
 
-                if ($Servername -ne $CentralServer) {
-                    Write-Verbose "[PROCESS] [$Servername] - Started settings sync..."
-                }
                 if (-not $ConnectionCurrent.Name) {
-                    if ($Servername -ne $CentralServer) {
-                        Write-Verbose "[PROCESS] [$Servername] - Started settings sync..."
                     Write-Warning "[PROCESS] [$($_)] - Logging database [$LoggingDb] does not exist."
                     $InvalidServers.Add($Pos)
                     $Pos++
@@ -60,13 +55,7 @@ function Invoke-SQLUndercoverCollection {
                 }
 
                 Write-Verbose "[PROCESS] Adding build for $ConnectionCurrent and $($ConnectionCurrent.Name)." = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
-
-                if ($Servername -ne $CentralServer) {
-                    Write-Verbose "[PROCESS] [$Servername] - Started settings sync..."
                 $Builds.Add($ConnectionCurrent.Query($InspectorBuildQry)) = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
-
-                if ($Servername -ne $CentralServer) {
-                    Write-Verbose "[PROCESS] [$Servername] - Started settings sync..."
                 $Pos++
             }
 
