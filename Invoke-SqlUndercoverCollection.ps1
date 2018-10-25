@@ -248,12 +248,11 @@ function Invoke-SQLUndercoverCollection {
             $CentralConnection.Query($ReportQry)
             
             Write-Verbose "[PROCESS] [$CentralServer] - SQLUndercover Report has completed."
-            $FinalReportQry = "SELECT TOP (1) ReportData FROM [$LoggingDb].[Inspector].[ReportData] ORDER BY ID DESC;"
-            $Report = $CentralConnection.Query($FinalReportQry)
-
-            $Report | Format-Table -Wrap -HideTableHeaders | Out-File -FilePath $FileName -Width 4000
         }
     }
     end {
+        $FinalReportQry = "SELECT TOP (1) ReportData FROM [$LoggingDb].[Inspector].[ReportData] ORDER BY ID DESC;"
+        $Report = $CentralConnection.Query($FinalReportQry)
+        $Report | Format-Table -Wrap -HideTableHeaders | Out-File -FilePath $FileName -Width 4000
     }
 }
