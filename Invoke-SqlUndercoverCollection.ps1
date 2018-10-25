@@ -95,7 +95,7 @@ function Invoke-SQLUndercoverCollection {
         }
 
         Write-Verbose '[PROCESS] Validating $ModuleConfig...'
-        if ($null -eq $ModuleConfig) {
+        if ($ModuleConfig -eq 'NULL') {
             Write-Warning '[Validation] - ModuleConfig = NULL (Auto determined)'
         } elseif ($ModuleConfig -notin $CentralModules.ModuleConfig_Desc) {
             Write-Warning "[Validation] - ModuleConfig does not exist, valid options are: $($CentralModules.ModuleConfig_Desc) or leave blank for auto determined ModuleConfig"
