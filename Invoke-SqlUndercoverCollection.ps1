@@ -1,4 +1,5 @@
 #requires -Modules dbatools
+# SON: We'll create a .psm1 a .psd1 file and put the above into the $RequiredModules field there.
 
 function Invoke-SQLUndercoverCollection {
     [CmdletBinding()]
@@ -19,7 +20,7 @@ function Invoke-SQLUndercoverCollection {
         $InvalidServers = New-Object -TypeName System.Collections.Generic.List[int]
         $ActiveServers = New-Object -TypeName System.Collections.Generic.List[string]
         $Builds = New-Object -TypeName System.Collections.Generic.List[psobject]
-        [string]$ModuleConfig
+        [string]$ModuleConfig = $null # SON: Has to be a string NULL or is $null okay?
 
         Write-Verbose "[BEGIN  ] [$CentralServer] - Checking central server connectivity."
         $CentralConnection = Get-DbaDatabase -SqlInstance $CentralServer -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
@@ -44,17 +45,29 @@ function Invoke-SQLUndercoverCollection {
                 $InspectorBuildQry = "EXEC [$LoggingDb].[Inspector].[PSGetInspectorBuild];"
             } -Process {
                 Write-Verbose "[PROCESS] [$($_)] - Getting Inspector build info..."
-                $Connection = Get-DbaDatabase -SqlInstance $_ -Database $LoggingDb -ErrorAction Stop -WarningAction Stop
+                $ConnectioCurrentn = Get-DbaDatabase -SqlInstance $_ -Database $LoggingDb -ErrorAction Stop -WarningAction Stop = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
+
+                if ($Servername -ne $CentralServer) {
+                    Write-Verbose "[PROCESS] [$Servername] - Started settings sync..."
                 
-                if (-not $Connection.Name) {
+                if (-not $ConnectioCurrentn.Name) { = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
+
+                    if ($Servername -ne $CentralServer) {
+                        Write-Verbose "[PROCESS] [$Servername] - Started settings sync..."
                     Write-Warning "[PROCESS] [$($_)] - Logging database [$LoggingDb] does not exist."
                     $InvalidServers.Add($Pos)
                     $Pos++
                     break
                 }
 
-                Write-Verbose "[PROCESS] Adding build for $Connection and $($Connection.Name)."
-                $Builds.Add($Connection.Query($InspectorBuildQry))
+                Write-Verbose "[PROCESS] Adding build for $ConnectioCurrentn and $($ConnectioCurrentn.Name)." = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
+
+                if ($Servername -ne $CentralServer) {
+                    Write-Verbose "[PROCESS] [$Servername] - Started settings sync..."
+                $Builds.Add($ConnectioCurrentn.Query($InspectorBuildQry)) = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
+
+                if ($Servername -ne $CentralServer) {
+                    Write-Verbose "[PROCESS] [$Servername] - Started settings sync..."
                 $Pos++
             }
 
@@ -87,10 +100,99 @@ function Invoke-SQLUndercoverCollection {
         $SettingsTables = 'Settings', 'CurrentServers', 'EmailRecipients', 'EmailConfig', 'Modules'
         foreach ($Setting in $SettingsTables) {
             $ColumnNamesQry = "EXEC [$LoggingDb].[Inspector].[PSGetColumns] @Tablename = '$Setting'"
-            $ColumnNames = $CentralConnection.Query($ColumnNamesQry)
-            $ColumnNamesFromTableQry = "SELECT $($ColumnNames.Columnnames) FROM [$LoggingDb].[Inspector].[$Setting]"
+            $ColumnNameResults = $CentralConnection.Query($ColumnNamesQry)
+            $ColumnNamesFromTableQry = "SELECT $($ColumnNameResults.Columnnames) FROM [$LoggingDb].[Inspector].[$Setting]"
             Set-Variable -Name "Central$($Setting)" -Value ($CentralConnection.Query($ColumnNamesFromTableQry))
         }
+
+        Write-Verbose '[PROCESS] Validating $ModuleConfig...'
+        if ($null -eq $ModuleConfig) {
+            Write-Warning '[Validation] - ModuleConfig = NULL (Auto determined)'
+        } elseif ($ModuleConfig -notin $CentralModules.ModuleConfig_Desc) {
+            Write-Warning "[Validation] - ModuleConfig does not exist, valid options are: $($CentralModules.ModuleConfig_Desc) or leave blank for auto determined ModuleConfig"
+            break
+        }
+        Write-Verbose "[PROCESS] [Validation] - ModuleConfig ok."
+
+        Write-Verbose "[PROCESS] Populating LinkedServername variable from the Settings table..."
+        $LinkedServername = ($CentralSettings | Where-Object Description -eq LinkedServername).Value
+        if ($LinkedServername.Length -gt 1) {
+            Write-Warning "[Validation] - The Inspector has been configured for use with a Linked server please reinstall the Inspector with @LinkedServername = NULL"
+            # SON: think you've found something I haven't before :) @LinkedServername ... why '@' and not '$'?
+            break
+        }
+        Write-Verbose "[PROCESS] [Validation] - Inspector configured correctly for PS collection."
+
+        #region SON: Potential to make this a separate function
+        $WriteTableOptions = @{
+            SqlInstance = ''
+            Database = $LoggingDb
+            Schema = 'Inspector'
+            Table = ''
+            NoTableLock = $true
+        }
+        foreach ($Servername in $ActiveServers.Servername) {
+            Write-Verbose "[PROCESS] Initialising collection variables..."
+            $CollectedData = @()
+            $ColumnNames = @()
+            $ExecutedModules = @()
+
+            Write-Verbose "[PROCESS] [$Servername] - Connecting..."
+            $CurrentConnection = Get-DbaDatabase -SqlInstance $Servername -Database $LoggingDb
+
+            if ($Servername -ne $CentralServer) {
+                Write-Verbose "[PROCESS] [$Servername] - Starting settings sync..."
+                $WriteTableOptions.SqlInstance = $Servername
+                
+                Write-Verbose "[PROCESS] Truncating or deleting from Settings table..."
+                $SettingsTables | Sort-Object | ForEach-Object -Process {
+                    $SettingsTableName = $_
+                    $WriteTableOptions.Table = $SettingsTableName
+
+                    if ($SettingsTableName -eq 'Modules') {
+                        Write-Verbose "[PROCESS] [$Servername] - Deleting from table [Inspector].[$SettingsTableName]"
+                        $TruncateDeleteQry = "DELETE FROM [$LoggingDb].[Inspector].[$SettingsTableName];"
+                    } else {
+                        Write-Verbose "[PROCESS] [$Servername] - Truncating table [Inspector].[$SettingsTableName]"
+                        $TruncateDeleteQry = "TRUNCATE TABLE [$LoggingDb].[Inspector].[$SettingsTableName];"
+                    }
+                    $CurrentConnection.Query($TruncateDeleteQry)
+                }
+
+                Write-Verbose '[PROCESS] Syncing data in settings table in reverse order due to foreign key relationship between CurrentServers and Modules...'
+                $SettingsTables | Sort-Object -Descending | ForEach-Object -Process {
+                    $SettingsTableName = $_
+                    $WriteTableOptions.Table = $SettingsTableName
+
+                    Write-Verbose "[PROCESS] [$Servername] - Syncing data for table [Inspector].[$SettingsTableName]"
+                    Write-DbaDataTable @WriteTableOptions -InputObject$(Get-Variable $("Central$($SettingsTableName)") -ValueOnly)
+                }
+            Write-Verbose "[PROCESS] [$Servername] - Finished settings sync"
+            }   
+
+            Write-Verbose "[PROCESS] [$Servername] - Executing [Inspector].[InspectorDataCollection] @ModuleConfig = $($ModuleConfig). @PSCollection = 1"
+            $DataCollectionQry = "EXEC [$LoggingDb].[Inspector].[InspectorDataCollection] @ModuleConfig = $ModuleConfig, @PSCollection = 1;"
+            $ExecutedModules = $CurrentConnection.Query($DataCollectionQry)
+
+            $ExecutedModules = $ExecutedModules |
+                Where-Object { $_.Servername -ne $CentralServer } |
+                Select-Object -Property Servername, Module, Tablename, StageTablename, StageProcname, TableAction, InsertAction, RetentionInDays
+
+            if ($Servername -ne $CentralServer) {
+                Write-Verbose "[PROCESS] [$Servername] - Starting data retrieval loop..."
+            }
+
+            foreach ($Module in $ExecutedModules) {
+                $ModuleName = $Module.Module
+                $Tablename = $Module.Tablename.ToString().split(',')
+                $TableAction = $Module.TableAction.ToString().split(',')
+                $StageTablename = $Module.StageTablename.ToString().split(',')
+                $StageProcname = $Module.StageProcname.ToString()
+                $InsertAction = $Module.InsertAction.ToString().split(',')
+                $RetentionInDays = $Module.RetentionInDays.ToString().split(',')
+                $Pos = 0
+            }
+            #endregion
     }
     
     end {
