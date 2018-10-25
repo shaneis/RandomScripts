@@ -190,7 +190,7 @@ function Invoke-SQLUndercoverCollection {
                         { $_ -lt 3 } {
                             $WriteTableOptions.Table = $Tablename[$Pos]
                             Write-Verbose "[PROCESS] Delete logged info for server from Central Db."
-                            $DeleteQry = "EXEC sp_executesql N'DELETE FROM [$LoggingDb].[Inspector].[$($Tablename[$Pos])] WHERE [Servername] = @Severname"
+                            $DeleteQry = "EXEC sp_executesql N'DELETE FROM [$LoggingDb].[Inspector].[$($Tablename[$Pos])] WHERE [Servername] = @Servername"
                         }
                         { $_ -eq 2 } {
                             Write-Verbose "[PROCESS] Append the retention period to the WHERE clause."
