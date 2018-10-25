@@ -179,7 +179,7 @@ function Invoke-SQLUndercoverCollection {
                 $InsertAction = $Module.InsertAction.ToString().split(',')
                 $RetentionInDays = $Module.RetentionInDays.ToString().split(',')
                 $Pos = 0
-                Write-Verbosee "[PROCESS] [$Servername] - Getting data for: $Modulename"
+                Write-Verbose "[PROCESS] [$Servername] - Getting data for: $Modulename"
                 $Tablename | ForEach-Object -Process {
                     $BaseTable = $_
                     Write-Verbose "[PROCESS] Switching destination to central server."
