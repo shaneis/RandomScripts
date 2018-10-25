@@ -153,7 +153,7 @@ function Invoke-SQLUndercoverCollection {
                     $WriteTableOptions.Table = $SettingsTableName
 
                     Write-Verbose "[PROCESS] [$Servername] - Syncing data for table [Inspector].[$SettingsTableName]"
-                    Write-DbaDataTable @WriteTableOptions -InputObject$(Get-Variable $("Central$($SettingsTableName)") -ValueOnly)
+                    Write-DbaDataTable @WriteTableOptions -InputObject $(Get-Variable $("Central$($SettingsTableName)") -ValueOnly)
                 }
             Write-Verbose "[PROCESS] [$Servername] - Finished settings sync"
             }   
