@@ -204,7 +204,7 @@ function Invoke-SQLUndercoverCollection {
                         { $_ -eq 3 } {
                             $WriteTableOptions.Table = $($StageTablename[$Pos])
                             Write-Verbose "[PROCESS] Truncate stage table."
-                            $DeleteQry = "TRUNCATE TABLE [$LoggingDb].[Inspector].[$StageTablename[$Pos])];"
+                            $DeleteQry = "TRUNCATE TABLE [$LoggingDb].[Inspector].[$StageTablename[$Pos]];"
                         }
                     }
                     $CollectedData = $CurrentConnection.Query($DeleteQry)
