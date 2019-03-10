@@ -8,7 +8,7 @@ function Invoke-Lollercoaster {
 
         $LollerCoasterStage = [Data.DataColumn]::new('LollerCoasterStage', [String])
         $LollerCoasterTable.Columns.Add($LollerCoasterStage)
-        $LollerCoasterTable.Rows.Add(@'
+        $null = $LollerCoasterTable.Rows.Add(@'
         __)
         LOL
            O
@@ -27,8 +27,7 @@ function Invoke-Lollercoaster {
     
     process {
         for ([Int]$i = 0; $i -lt $LollerCoasterTable.Rows.Count; $i++) {
-            $LollerCoasterTable.Rows[$_] |
-                Select-Object -ExpandProperty LollerCoasterStage
+            ($LollerCoasterTable.Rows[$i]).LollerCoasterStage
             
             Start-Sleep -Milliseconds 150   
         }
