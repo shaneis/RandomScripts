@@ -555,20 +555,6 @@ function Invoke-Lollercoaster {
                                  O   O
                                   LOL
 '@)
-        $null = $LollerCoasterTable.Rows.Add(@'
-          
-        LOL
-           O         
-            L         LOL   LOL
-             O       O   O O   O
-              L     L     L     L
-               O   O       O   O
-                LOL         LOL
-                               O
-                                L     LOL
-                                 O__)O
-                                  LOL
-'@)
         #endregion
 
         #region current console info.
@@ -577,18 +563,37 @@ function Invoke-Lollercoaster {
     }
     
     process {
-        [Environment]::NewLine
+        
+       [Environment]::NewLine
         for ([Int]$i = 0; $i -lt $LollerCoasterTable.Rows.Count; $i++) {
-            $Host.UI.RawUI.CursorPosition
-            'Stage {0}' -f $i
+            $Host.UI.RawUI.CursorPosition = $StartCursorPosition
+
             ($LollerCoasterTable.Rows[$i]).LollerCoasterStage
             
-            if ($i -in (21..28)) {
-                Start-Sleep -Milliseconds 100
-            } else {
-                Start-Sleep -Milliseconds 150   
+            $EndCursorPosition = $Host.UI.RawUI.CursorPosition
+
+            switch ($i) {
+               { $_ -in (21..28) } {
+                  Start-Sleep -Milliseconds 100
+                  $Host.UI.RawUI.SetBufferContents(
+                     @{Top = $StartCursorPosition.Y; Bottom = $EndCursorPosition.Y; Right = [System.Console]::BufferWidth; Left = 0},
+                     @{Character = ' '; ForegroundColor = $($Host.UI.RawUI.ForegroundColor); BackgroundColor = $($Host.UI.RawUI.BackgroundColor)}
+                  )
+               }
+               { $_ -eq ($LollerCoasterTable.Rows.Count -1)} {
+                     # Leave it in all it's glory
+                     continue
+                  }
+               default { 
+                  Start-Sleep -Milliseconds 150
+                     $Host.UI.RawUI.SetBufferContents(
+                        @{Top = $StartCursorPosition.Y; Bottom = $EndCursorPosition.Y; Right = [System.Console]::BufferWidth; Left = 0},
+                        @{Character = ' '; ForegroundColor = $($Host.UI.RawUI.ForegroundColor); BackgroundColor = $($Host.UI.RawUI.BackgroundColor)}
+                     )
+                  }
             }
-        }
+            
+            }
     }
     
     end {
