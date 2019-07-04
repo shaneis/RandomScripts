@@ -1,20 +1,67 @@
-﻿function Start-Pomodoro {
+﻿[CmdletBinding()]
+param (
+    [Switch]
+    $ConsoleTest
+)
+
+function Start-Pomodoro {
     [CmdletBinding()]
-    param()
+    param(
+        [Parameter(Position = 0)]
+        [ValidateNotNullOrEmpty()]
+        [datetime]
+        $EndDate = (Get-Date).AddMinutes(90),
+
+        [Parameter(ValueFromPipeline,
+                   Position = 1)]
+        [ValidateNotNullOrEmpty()]
+        [string[]]
+        $Subjects
+    )
+
+    begin {
+        <#
+            foreach subject,
+                We create a "run" hash table,
+                output the start/end values.
+                and then run everything in the process block.
+        #>
+        $StartDate = Get-Date
+
+        <#
+            We have 30 minute blocks and each block contains a subject and a rest.
+            So each block is essentially 2.
+        #>
+        $TotalBlocks = (($EndDate - $StartDate).TotalMinutes / 30) * 2
+
+        [PSCustomObject]$DetailsTable = 1..$TotalBlocks |
+            ForEach-Object -Begin {
+                Write-Verbose -Message "[$((Get-Date).TimeOfDay)][$($MyInvocation.MyCommand)] Populating details table"
+            } -Process {
+                if (($_ % 2) -ne 0) {
+                    @{Work = 25}
+                } else {
+                    @{Rest = 5}
+                }
+            } -End {
+                Write-Verbose -Message "[$((Get-Date).TimeOfDay)][$($MyInvocation.MyCommand)] Populated details table"
+            }
+    }
 
     process {
-        for([Int]$i = 0; $i -lt 10; $i++) {
-            $Timing = switch ($i) {
-                {($_ % 8) -eq 0 -and $_ -ne 0} {10; break}
-                {($_ % 2) -eq 0 -and $_ -ne 0} {5; break}
-                default {25}
-            }
-
+        foreach ($Action in $DetailsTable) {
             [PSCustomObject]@{
-                Timing = $Timing
-                Subject = $null
+                Timing = $Action.Values -as [Int]
+                Subject = $Action.Keys -as [String]
+                StartDate = $StartDate
+                EndDate = $EndDate
             }
         }
     }
+
+    end {}
 }
 
+if ($ConsoleTest) {
+    Start-Pomodoro
+}
