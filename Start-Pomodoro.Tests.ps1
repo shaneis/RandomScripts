@@ -5,15 +5,20 @@ $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '\.Tests\.', '.'
 Describe 'Start-Pomodoro' {
     Context 'Properties' {
 
-        $expectedProperites = 'Timing','Subject','EndDate','StartDate'
-        foreach ($expProperty in $expectedProperites) {
-            It "has the expected property of [$expProperty]" {
-                $notePropertyName = ((Start-Pomodoro) | Get-Member -MemberType NoteProperty).Name
-                $notePropertyName | Should -Contain $expProperty
-            }
+        It -Name 'has the property [ <ExpProperty> ]' -TestCases @(
+            @{ ExpProperty = 'Timing' },
+            @{ ExpProperty = 'Subject' },
+            @{ ExpProperty = 'EndDate' },
+            @{ ExpProperty = 'StartDate' }
+        ) -Test {
+            param ($ExpProperty)
+
+            $NotePropertyName = (Start-Pomodoro | Get-Member -MemberType NoteProperty).Name
+
+            $NotePropertyName | Should -Contain $ExpProperty -Because 'we expect only these properties'
         }
 
-        It -Name 'property <prop> should be of type <type>' -TestCases @(
+        It -Name 'property [ <prop> ] should be of type [ <type> ]' -TestCases @(
             @{ prop = 'Timing';    type = 'Int' }
             @{ prop = 'Subject';   type = 'String'}
             @{ prop = 'EndDate';   type = 'Datetime'}
@@ -26,7 +31,20 @@ Describe 'Start-Pomodoro' {
         }
     }
 
-    Context "Default Parameters." {
+    Context -Name 'Parameters' -Fixture {
+        It -Name 'has the parameters [ <ExpectedParameter> ]' -TestCases @(
+            @{ ExpectedParameter = 'EndDate' },
+            @{ ExpectedParameter = 'Subjects' },
+            @{ ExpectedParameter = 'ShowBlocks'}
+        ) -Test {
+            param ($ExpectedParameter)
+
+            Get-Command -Name Start-Pomodoro |
+                Should -HaveParameter $ExpectedParameter -Because 'we defined them to'
+        }
+    }
+
+    Context "Default run" {
 
         BeforeAll -Scriptblock {
             Mock -CommandName Get-Date -MockWith {
@@ -53,8 +71,7 @@ Describe 'Start-Pomodoro' {
         It -Name 'defaults to 3 blocks of work' -Test {
             $SubjectCount = $Pomodoro.Subject | Group-Object -NoElement
 
-            $ActualCount = $SubjectCount |
-                Where-Object Name -eq 'Work'
+            $ActualCount = $SubjectCount | Where-Object Name -eq 'Work'
                 
             $ActualCount.Count | Should -Be 3 -Because 'we should default to 3 blocks of work'
         }
@@ -62,8 +79,7 @@ Describe 'Start-Pomodoro' {
         It -Name 'defaults to 3 blocks of rest' -Test {
             $RestCount = $Pomodoro.Subject | Group-Object -NoElement
 
-            $ActualCount = $RestCount |
-                Where-Object Name -eq 'Rest'
+            $ActualCount = $RestCount | Where-Object Name -eq 'Rest'
                 
             $ActualCount.Count | Should -Be 3 -Because 'we should default to 3 blocks of rest'
         }

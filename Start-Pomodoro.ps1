@@ -1,10 +1,4 @@
-﻿[CmdletBinding()]
-param (
-    [Switch]
-    $ConsoleTest
-)
-
-function Start-Pomodoro {
+﻿function Start-Pomodoro {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0)]
@@ -16,7 +10,11 @@ function Start-Pomodoro {
                    Position = 1)]
         [ValidateNotNullOrEmpty()]
         [string[]]
-        $Subjects
+        $Subjects,
+
+        [Parameter(Position = 2)]
+        [Switch]
+        $ShowBlocks
     )
 
     begin {
@@ -24,7 +22,7 @@ function Start-Pomodoro {
             foreach subject,
                 We create a "run" hash table,
                 output the start/end values.
-                and then run everything in the process block.
+                and then run everything in the end block.
         #>
         $StartDate = Get-Date
 
@@ -51,7 +49,7 @@ function Start-Pomodoro {
     process {
         foreach ($Action in $DetailsTable) {
             [PSCustomObject]@{
-                Timing = $Action.Values -as [Int]
+                Timing = $Action.Values
                 Subject = $Action.Keys -as [String]
                 StartDate = $StartDate
                 EndDate = $EndDate
@@ -59,9 +57,7 @@ function Start-Pomodoro {
         }
     }
 
-    end {}
-}
-
-if ($ConsoleTest) {
-    Start-Pomodoro
+    end {
+        
+    }
 }
