@@ -51,7 +51,7 @@ while ((Get-Date) -lt ($EndDate)) {
             Action = $CurrentAction
             StartTime = Get-Date
             PSTypeName = 'Pomodoro'
-	    Mark = if ((($WorkCounter % 2) -ne 0) -and $WorkCounter -ne 1 -and $CurrentAction -eq 'Work') { 'X' }
+            Mark = if ((($WorkCounter % 2) -ne 0) -and $WorkCounter -ne 1 -and $CurrentAction -eq 'Work') { 'X' }
         }
         Send-OSNotification -Title $CurrentAction -Body "Starting : $(Get-Date) - Finishing : $((Get-Date).AddMinutes(($TimeHash[$CurrentAction])))"
         Start-Sleep -Seconds (New-TimeSpan -Minutes ($TimeHash[$CurrentAction])).TotalSeconds
