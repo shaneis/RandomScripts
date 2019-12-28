@@ -5,6 +5,8 @@ $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '\.Tests\.', '.'
 Describe 'Start-Pomodoro' {
     Context 'Properties' {
 
+        Mock -CommandName Start-Sleep -MockWith {}
+
         It -Name 'has the property [ <ExpProperty> ]' -TestCases @(
             @{ ExpProperty = 'Timing' },
             @{ ExpProperty = 'Subject' },
@@ -47,6 +49,7 @@ Describe 'Start-Pomodoro' {
     Context "Default run" {
 
         BeforeAll -Scriptblock {
+            Mock -CommandName Start-Sleep -MockWith {}
             Mock -CommandName Get-Date -MockWith {
                 [Datetime]::new(2019, 06, 29, 13, 30, 00)
             } -Verifiable
