@@ -10,7 +10,7 @@ param (
     $Random
 )
 
-[String[]]$Item = 'JavaScript','Research','PSKoans','Blog','Python','PowerShell','C#','dbachecks','DBAFundamentals','Entity Framework','Containers'
+[String[]]$Item = 'JavaScript','Research','PSKoans','Blog','Python','PowerShell','C#','dbachecks','DBAFundamentals','Entity Framework','Containers','R'
 
 $TimeHash = @{
     'Work' = 25
@@ -18,7 +18,7 @@ $TimeHash = @{
     'Long Break' = 20
 }
 $Item | ForEach-Object -Process {
-    $TimeHash[$_] = 15
+    $TimeHash[$_] = 20
 }
 
 $ItemStack = [System.Collections.Generic.Stack[string]]::new()
@@ -51,7 +51,7 @@ while ((Get-Date) -lt ($EndDate)) {
             Action = $CurrentAction
             StartTime = Get-Date
             PSTypeName = 'Pomodoro'
-            Mark = if ((($WorkCounter % 2) -ne 0) -and $WorkCounter -ne 1 -and $CurrentAction -eq 'Work') { 'X' }
+	    Mark = if ((($WorkCounter % 2) -ne 0) -and $WorkCounter -ne 1 -and $CurrentAction -eq 'Work') { 'X' }
         }
         Send-OSNotification -Title $CurrentAction -Body "Starting : $(Get-Date) - Finishing : $((Get-Date).AddMinutes(($TimeHash[$CurrentAction])))"
         Start-Sleep -Seconds (New-TimeSpan -Minutes ($TimeHash[$CurrentAction])).TotalSeconds
