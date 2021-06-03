@@ -3,6 +3,7 @@ function ConvertTo-SQLStatement {
     param (
         [Parameter(
             Mandatory,
+            ValueFromPipeline,
             Position = 0
         )]
         $Data
@@ -17,7 +18,7 @@ function ConvertTo-SQLStatement {
     }
     
     process {
-        $headers = $data.PSObject.Properties.Name
+        $headers = ($data | Get-Member -MemberType NoteProperty, Property).Name
 
         if ($needsHeader) {
             foreach ($header in $headers) {
