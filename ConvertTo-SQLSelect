@@ -1,4 +1,4 @@
-function ConvertTo-SQLStatement {
+function ConvertTo-SQLSelect {
     [CmdletBinding()]
     param (
         [Parameter(
