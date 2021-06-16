@@ -49,7 +49,7 @@ function ConvertTo-SQLSelect {
             foreach ($column in $headers) {
                 Write-Verbose "Row: $dataRow - Column: $column - Value $($dataRow.$column)"
 
-                $rowLine = ('', ', ')[$needsRowComma] + "'$($dataRow.$column)'"
+                $rowLine = ('', ', ')[$needsRowComma] + "'$(($dataRow.$column) -replace "'", "''")'"
                 $null = $rowInsert.Append($rowLine)
 
                 $needsRowComma = $true
