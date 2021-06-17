@@ -13,11 +13,15 @@ function ConvertTo-SQLSelect {
         $sqlStmt = [Text.StringBuilder]::new()
         $null = $sqlStmt.AppendLine('SELECT')
 
-        [bool] $needsHeader = $true
         [bool] $needsStartingComma = $false
+        $captureAll = [System.Collections.Generic.List[object]]::new()
     }
     
     process {
+        ($Data).ForEach({ $captureAll.Add($_) })
+    }
+    
+    end {
         $headers = ($data | Get-Member -MemberType NoteProperty, Property).Name
 
         if ($needsHeader) {
@@ -38,7 +42,7 @@ function ConvertTo-SQLSelect {
             $needsHeader = $false
         }
 
-        foreach ($dataRow in $data) {
+        foreach ($dataRow in $captureAll) {
             $rowInsert = [Text.StringBuilder]::new()
             
             $startBracket = ''.PadLeft(5 - (2 * $needsStartingComma)) + ('', ', ')[$needsStartingComma] + '('
@@ -63,9 +67,7 @@ function ConvertTo-SQLSelect {
         }
 
         $null = $sqlStmt.AppendLine(") X ([$($headers -join '], [')])")
-    }
-    
-    end {
+        
         $sqlStmt.ToString()    
     }
 }
