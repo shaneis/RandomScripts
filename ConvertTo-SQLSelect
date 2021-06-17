@@ -13,6 +13,7 @@ function ConvertTo-SQLSelect {
         $sqlStmt = [Text.StringBuilder]::new()
         $null = $sqlStmt.AppendLine('SELECT')
 
+        [bool] $needsHeader = $true
         [bool] $needsStartingComma = $false
         $captureAll = [System.Collections.Generic.List[object]]::new()
     }
