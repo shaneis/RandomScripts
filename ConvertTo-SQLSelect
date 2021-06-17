@@ -25,7 +25,6 @@ function ConvertTo-SQLSelect {
     end {
         $headers = ($data | Get-Member -MemberType NoteProperty, Property).Name
 
-        if ($needsHeader) {
             foreach ($header in $headers) {
               <# 
                 Why the PadLeft and weird 5-2*bool variable? Formatting.
@@ -40,8 +39,6 @@ function ConvertTo-SQLSelect {
             $needsStartingComma = $false
             $null = $sqlStmt.AppendLine('FROM (VALUES')
 
-            $needsHeader = $false
-        }
 
         foreach ($dataRow in $captureAll) {
             $rowInsert = [Text.StringBuilder]::new()
