@@ -15,11 +15,22 @@ $Cred = [PSCredential]::new(
 
 pause
 
+Write-Verbose @'
+Running [
+	Compare-SqlTableColumns -SqlInstance localhost -Table1 'dbo.DifferenceTable01' -Table2 'dbo.DifferenceTable02' -SqlCredential $Cred
+]
+'@ -Verbose
 Compare-SqlTableColumns -SqlInstance localhost -Table1 'dbo.DifferenceTable01' -Table2 'dbo.DifferenceTable02' -SqlCredential $Cred |
 	Format-Table
 
 pause
 
+Write-Verbose @'
+Running [
+	$x = Compare-SqlTableColumns -SqlInstance localhost -Table1 'dbo.DifferenceTable01' -Table2 'dbo.DifferenceTable02' -SqlCredential $Cred
+	$x | Format-Table
+]
+'@ -Verbose
 $x = Compare-SqlTableColumns -SqlInstance localhost -Table1 'dbo.DifferenceTable01' -Table2 'dbo.DifferenceTable02' -SqlCredential $Cred -Verbose
 
 $x | Format-Table
