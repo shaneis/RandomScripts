@@ -1,3 +1,5 @@
+#! /usr/bin/pwsh
+
 function Compare-SqlTableColumns {
 	<#
 	.SYNOPSIS

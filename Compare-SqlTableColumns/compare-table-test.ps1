@@ -1,4 +1,4 @@
-# !/opt/microsoft/powershell/7/pwsh
+#! /usr/bin/pwsh
 
 #region Import functions
 . $PSScriptRoot/Compare-SqlTableColumns.ps1
