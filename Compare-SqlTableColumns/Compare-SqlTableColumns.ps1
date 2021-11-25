@@ -75,7 +75,14 @@ function Compare-SqlTableColumns {
 		[Parameter(
 			ValueFromPipelineByPropertyName
 		)]
-		[PSCredential] $SqlCredential
+		[PSCredential] $SqlCredential,
+
+		# The database to connect to
+		[Parameter(
+			ValueFromPipelineByPropertyName
+		)]
+		[ValidateNotNullOrEmpty()]
+		[string] $Database = 'master'
 	)
 	
 	begin {
@@ -83,13 +90,13 @@ function Compare-SqlTableColumns {
 
 		$StopWatch = [Diagnostics.StopWatch]::StartNew()
 
-		$ColumnDetailQuery = @'
+		$ColumnDetailQuery = @"
 SELECT	table_name = OBJECT_NAME(c.[object_id]),
 	column_name = c.[name],
 	c.column_id
 FROM	[sys].[columns] AS c
 WHERE	c.[object_id] = OBJECT_ID(@table_name, N'U');
-'@	
+"@	
 	}
 	
 	process {
@@ -98,7 +105,7 @@ WHERE	c.[object_id] = OBJECT_ID(@table_name, N'U');
 		$TableParams = @{
 			SqlInstance = $SqlInstance
 			Query = $ColumnDetailQuery
-			Database = 'master'
+			Database = $Database
 			As = 'PSObject'
 		}
 
