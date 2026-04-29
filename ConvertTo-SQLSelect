@@ -19,7 +19,7 @@ function ConvertTo-SQLSelect {
     }
     
     process {
-        ($Data).ForEach({ $captureAll.Add($_) })
+        @($Data).ForEach({ $captureAll.Add($_) })
     }
     
     end {
